@@ -1,4 +1,4 @@
-0.7.0 (UNRELEASE)
+0.7.0 (UNRELEASED)
 =====================
 
 - docs: Changed URLs to github repository.
