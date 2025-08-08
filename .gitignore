@@ -16,7 +16,6 @@ eggs/
 MANIFEST
 
 # Unit test / coverage reports
-.tox/
 .coverage
 .coverage.*
 .cache
@@ -29,6 +28,8 @@ py*-tests.xml
 docs/_build/
 
 # Environments
+.direnv/
+.tox/
 .venv*/
 
 # Personal stuff

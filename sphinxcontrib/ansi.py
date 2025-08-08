@@ -86,7 +86,7 @@ CODE_CLASS_MAP = {
     45: 'bg_magenta',
     46: 'bg_cyan',
     47: 'bg_white',
-    }
+}
 
 
 class ANSIColorParser(object):
@@ -134,7 +134,7 @@ class ANSIColorParser(object):
         # this holds the end of the last regex match
         last_end = 0
         # iterate over all color codes
-        console.warn("\nANSI_COLORIZE.block:\n{}\nANSI_COLORIZE.block.end\n".format(raw))
+        console.warning("\nANSI_COLORIZE.block:\n{}\nANSI_COLORIZE.block.end\n".format(raw))
 
         for match in COLOR_PATTERN.finditer(raw):
             # add any text preceeding this match
@@ -154,8 +154,12 @@ class ANSIColorParser(object):
                 self.pending_nodes.append(code_node)
                 # and set the classes for its colors
                 for code in codes:
-                    code_node['classes'].append(
-                        'ansi-%s' % CODE_CLASS_MAP[code])
+                    style_name = CODE_CLASS_MAP.get(code)
+                    if style_name:
+                        code_node["classes"].append("ansi-%s" % style_name)
+                    else:
+                        console.warning("IGNORED: ANSI-CODE: {}".format(code))
+
         # add any trailing text
         tail = raw[last_end:]
         self._add_text(tail)
@@ -177,7 +181,8 @@ class ANSIColorParser(object):
         if app.builder.name != 'html':
             # strip all color codes in non-html output
             handler = self._strip_color_from_block_content
-        for ansi_block in doctree.traverse(ansi_literal_block):
+        # OLD: for ansi_block in doctree.traverse(ansi_literal_block):
+        for ansi_block in doctree.findall(ansi_literal_block):
             handler(ansi_block)
 
 
