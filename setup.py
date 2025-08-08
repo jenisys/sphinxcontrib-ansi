@@ -24,19 +24,17 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, find_namespace_packages
 
 with open('README.rst') as stream:
     long_desc = stream.read()
 
-requires = ['sphinx>=1.0']
-
 setup(
     name='sphinxcontrib-ansi',
-    version='0.7.0',
+    version='0.7.1',
     url='https://github.com/sphinx-contrib/ansi',
     download_url='http://pypi.org/project/sphinxcontrib-ansi',
-    license='BSD',
+    license="BSD-2-Clause",
     author='Sebastian Wiesner',
     author_email='lunaryorn@googlemail.com',
     description='Sphinx extension ansi',
@@ -47,15 +45,28 @@ setup(
         'Environment :: Console',
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Topic :: Documentation',
         'Topic :: Utilities',
     ],
     platforms='any',
-    packages=find_packages(),
+    # packages=find_packages(),
+    packages=find_namespace_packages(where="./", include=["sphinxcontrib.ansi"]),
+    # namespace_packages=["sphinxcontrib"],
     include_package_data=True,
-    install_requires=requires,
-    namespace_packages=['sphinxcontrib'],
+    setup_requires=[
+        "setuptools",
+        "setuptools_scm",
+    ],
+    install_requires=[
+        "sphinx >= 2.0",
+        "docutils >= 0.21.2",
+    ],
+    tests_require = [
+        "pytest < 5.0; python_version < '3.0'",  # >= 4.2
+        "pytest >= 5.0; python_version >= '3.0'",
+        "pytest-html >= 1.19.0, < 2.0; python_version < '3.0'",
+        "pytest-html >= 2.0; python_version >= '3.0'",
+    ],
 )

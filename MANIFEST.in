@@ -1,8 +1,16 @@
-include README
+include .envrc*
+include CHANGES.rst
 include LICENSE
-include CHANGES.*
-include test_ansi.py
+include README.rst
+include requirements.txt
+include requirements.txt
 include tox.ini
-global-include requirements.txt
-recursive-include sphinxcontrib *.css
-recursive-include doc *.rst *.py
+recursive-include sphinxcontrib *.py *.css
+recursive-include doc *.rst *.py *.txt
+recursive-include tests *.py
+
+prune .direnv
+prune .tox
+prune .venv*
+prune build
+prune dist

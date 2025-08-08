@@ -4,7 +4,7 @@
 
 from __future__ import absolute_import, print_function
 from docutils import nodes
-from mock import Mock
+from unittest.mock import Mock
 from pathlib import Path
 import pytest
 import sys
