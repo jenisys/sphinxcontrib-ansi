@@ -5,73 +5,71 @@ on:
     tags:  # any tag regardless of its name, no branches
   push:  # only publishes pushes to the main branch to TestPyPI
     branches:  # any integration branch but not tag
-    - "master"
+      - "master"
     tags-ignore:
-    - >-
-      **
+      - >-
+        **
   pull_request:
-  schedule:
-  - cron: 1 0 * * *  # Run daily at 0:01 UTC
-  # Run every Friday at 18:02 UTC
-  # https://crontab.guru/#2_18_*_*_5
-  # - cron: 2 18 * * 5
+    types: [opened, reopened, review_requested]
+    branches: [ "master" ]
+  workflow_dispatch:
+  # -- DISABLE: Scheduled workflow-run
+  # schedule:
+  #  - cron: 1 0 * * *  # Run daily at 0:01 UTC
+  #  # Run every Friday at 18:02 UTC
+  #  # https://crontab.guru/#2_18_*_*_5
+  # # - cron: 2 18 * * 5
 
 jobs:
   linters:
-    name: >-
-      ${{ matrix.env.TOXENV }}
-    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.env.TOXENV }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         python-version:
-        - 3.8
-        os:
-        - ubuntu-20.04
+          - 3.13
         env:
-        - TOXENV: doc
+          - TOXENV: doc
     env:
       TOX_PARALLEL_NO_SPINNER: 1
 
     steps:
-    - name: Check out src from Git
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0  # needed by setuptools-scm
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install tox
-      run: |
-        python3 -m pip install --upgrade tox
-    - name: Log installed dists
-      run: >-
-        python -m pip freeze --all
-    - name: >-
-        Initialize tox envs
-      run: >-
-        python -m
-        tox
-        --parallel auto
-        --parallel-live
-        --notest
-        --skip-missing-interpreters false
-        -vv
-      env: ${{ matrix.env }}
-    - name: Test with tox
-      run: |
-        python -m tox --parallel auto --parallel-live
-      env: ${{ matrix.env }}
-    - name: Archive logs
-      uses: actions/upload-artifact@v2
-      with:
-        name: logs.zip
-        path: .tox/**/log/
+      - name: Check out sources from Git repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # needed by setuptools-scm
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install tox
+        run: |
+          python3 -m pip install --upgrade tox
+      - name: Log installed dists
+        run: >-
+          python -m pip freeze --all
+      - name: Initialize tox envs
+        run: >-
+          python -m tox
+          --parallel auto
+          --parallel-live
+          --notest
+          --skip-missing-interpreters false
+          -vv
+        env: ${{ matrix.env }}
+      - name: Test with tox
+        run: |
+          python -m tox --parallel auto --parallel-live
+        env: ${{ matrix.env }}
+      - name: Archive logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs.zip
+          path: .tox/**/log/
 
   unit:
-    name: >-
-      ${{ matrix.tox_env }}@${{ matrix.os }}
+    name: ${{ matrix.tox_env }}@${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       # fail-fast: false
@@ -82,84 +80,64 @@ jobs:
       # proof that we failed to catch a bug by not running it. Using
       # distribution should be prefferred instead of custom builds.
       matrix:
-        python-version:
-        # keep list sorted as it determines UI order too
-        - 3.6
-        - 3.7
-        - 3.8
-        - 3.9
-        # NOTE: Installing ansible under 3.10-dev is currently not
-        # NOTE: possible because compiling cffi explodes.
-        os:
-        # https://help.github.com/en/actions/reference/virtual-environments-for-github-hosted-runners
-        - ubuntu-20.04
+        python-version: ["3.13", "3.12", "3.11", "3.10"]
+        os: ["ubuntu-latest"]
         include:
-        - tox_env: py36
-          os: ubuntu-20.04
-          python-version: 3.6
-        - tox_env: py37
-          os: ubuntu-20.04
-          python-version: 3.7
-        - tox_env: py38
-          os: ubuntu-20.04
-          python-version: 3.8
-        - tox_env: py39
-          os: ubuntu-20.04
-          python-version: 3.9
-        # - tox_env: py36
-        #   os: macOS-latest
-        #   python-version: 3.6
-        # - tox_env: py38
-        #   os: macOS-latest
-        #   python-version: 3.8
+          - tox_env: py313
+            python-version: 3.13
+            os: ubuntu-latest
+          - tox_env: py312
+            python-version: 3.12
+            os: ubuntu-latest
+          - tox_env: py311
+            python-version: 3.11
+            os: ubuntu-latest
+          - tox_env: py310
+            python-version: 3.10
+            os: ubuntu-latest
 
     env:
       TOX_PARALLEL_NO_SPINNER: 1
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0  # needed by setuptools-scm
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: >-
-        Log the currently selected Python
-        version info (${{ matrix.python-version }})
-      run: |
-        python --version --version
-        which python
-    - name: Install tox
-      run: |
-        python3 -m pip install --upgrade tox
-    - name: Log installed dists
-      run: >-
-        python3 -m pip freeze --all
-    - name: >-
-        Initialize tox envs
-      run: >-
-        python3 -m
-        tox
-        --parallel auto
-        --parallel-live
-        --notest
-        --skip-missing-interpreters false
-        -vv
-      env:
-        TOXENV: ${{ matrix.tox_env }}
-    - name: "Test with tox: ${{ matrix.tox_env }}"
-      run: |
-        python3 -m tox
-      env:
-        TOXENV: ${{ matrix.tox_env }}
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # needed by setuptools-scm
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: "Use Python version: ${{ matrix.python-version }}"
+        run: |
+          python --version --version
+          which python
+      - name: "Install tox"
+        run: |
+          python3 -m pip install --upgrade tox
+      - name: Log installed dists
+        run: python3 -m pip freeze --all
+      - name: Initialize tox envs
+        run: >-
+          python3 -m tox
+          --parallel auto
+          --parallel-live
+          --notest
+          --skip-missing-interpreters false
+          -vv
+        env:
+          TOXENV: ${{ matrix.tox_env }}
+      - name: "Test with tox: ${{ matrix.tox_env }}"
+        run: |
+          python3 -m tox
+        env:
+          TOXENV: ${{ matrix.tox_env }}
 
   publish:
     name: Publish to PyPI registry
     needs:
-    - linters
-    - unit
-    runs-on: ubuntu-20.04
+      - linters
+      - unit
+    runs-on: ubuntu-latest
 
     env:
       PY_COLORS: 1
@@ -167,69 +145,65 @@ jobs:
       TOX_PARALLEL_NO_SPINNER: 1
 
     steps:
-    - name: Switch to using Python 3.8 by default
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-    - name: Install tox
-      run: >-
-        python3 -m
-        pip install
-        --user
-        tox
-    - name: Check out src from Git
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0  # needed by setuptools-scm
+      - name: Switch to latest stable Python version by default
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
+      - name: Install tox
+        run: >-
+          python3 -mpip install --user tox
+      - name: Check out src from Git
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # needed by setuptools-scm
 
-    - name: Drop Git tags from HEAD for non-tag-create events
-      if: >-
-        github.event_name != 'create' ||
-        github.event.ref_type != 'tag'
-      run: >-
-        git tag --points-at HEAD
-        |
-        xargs git tag --delete
-    - name: Instruct setuptools-scm not to add a local version part
-      if: >-
-        github.event_name == 'push' &&
-        github.ref == format(
-          'refs/heads/{0}', github.event.repository.default_branch
-        )
-      run: |
-        echo 'local_scheme = "no-local-version"' >> pyproject.toml
-        git update-index --assume-unchanged pyproject.toml
-    - name: Pre-populate tox env
-      run: >-
-        python -m
-        tox
-        --parallel auto
-        --parallel-live
-        --notest
-        --skip-missing-interpreters false
-        -vvvv
-    - name: Build dists
-      run: python -m tox -p auto --parallel-live -vvvv
-    - name: Publish to test.pypi.org
-      if: >-
-        (
+      - name: Drop Git tags from HEAD for non-tag-create events
+        if: >-
+          github.event_name != 'create' ||
+          github.event.ref_type != 'tag'
+        run: >-
+          git tag --points-at HEAD
+          |
+          xargs git tag --delete
+      - name: Instruct setuptools-scm not to add a local version part
+        if: >-
           github.event_name == 'push' &&
           github.ref == format(
             'refs/heads/{0}', github.event.repository.default_branch
           )
-        ) ||
-        (
+        run: |
+          echo 'local_scheme = "no-local-version"' >> pyproject.toml
+          git update-index --assume-unchanged pyproject.toml
+      - name: Pre-populate tox env
+        run: >-
+          python -m tox
+          --parallel auto
+          --parallel-live
+          --notest
+          --skip-missing-interpreters false
+          -vvvv
+      - name: Build dists
+        run: python -m tox -p auto --parallel-live -vvvv
+      - name: Publish to test.pypi.org
+        if: >-
+          (
+            github.event_name == 'push' &&
+            github.ref == format(
+              'refs/heads/{0}', github.event.repository.default_branch
+            )
+          ) ||
+          (
+            github.event_name == 'create' &&
+            github.event.ref_type == 'tag'
+          )
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          password: ${{ secrets.testpypi_password }}
+          repository_url: https://test.pypi.org/legacy/
+      - name: Publish to pypi.org
+        if: >-  # "create" workflows run separately from "push" & "pull_request"
           github.event_name == 'create' &&
           github.event.ref_type == 'tag'
-        )
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        password: ${{ secrets.testpypi_password }}
-        repository_url: https://test.pypi.org/legacy/
-    - name: Publish to pypi.org
-      if: >-  # "create" workflows run separately from "push" & "pull_request"
-        github.event_name == 'create' &&
-        github.event.ref_type == 'tag'
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        password: ${{ secrets.pypi_password }}
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          password: ${{ secrets.pypi_password }}
