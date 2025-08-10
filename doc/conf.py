@@ -23,21 +23,29 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# -- ENSURE: Can import this package from local workspace.
+from pathlib import Path
+import sys
 
-needs_sphinx = '1.0'
+HERE = Path(__file__).parent
+TOPDIR = HERE.parent.resolve()
+sys.path.insert(0, str(TOPDIR))
 
+from sphinxcontrib.ansi import __version__ as VERSION
+
+needs_sphinx = '2.0'
 extensions = [
     'sphinx.ext.intersphinx',
     # DISABLED: 'sphinxcontrib.issuetracker',
 ]
 
-source_suffix = '.rst'
+source_suffix = {".rst": "restructuredtext"}
 master_doc = 'index'
 
 project = u'sphinxcontrib-ansi'
-copyright = u'2010, 2011 Sebastian Wiesner; 2020 Jens Engel (since 0.6.1)'
-version = '0.7.0'
-release = '0.7.0'
+copyright = u'2010, 2011 Sebastian Wiesner; 2020-2025 Jens Engel (since 0.6.1)'
+version = VERSION
+release = VERSION
 
 exclude_patterns = ['build/*', '_build/*']
 

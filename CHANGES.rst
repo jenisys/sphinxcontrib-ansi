@@ -1,4 +1,4 @@
-0.7.0 (UNRELEASED)
+0.7.2 (UNRELEASED)
 =====================
 
 - Add more tests under "tests" directory.
@@ -14,6 +14,11 @@ sphinxcontrib.ansi:
   REASON: "Nodes.travese()" is becoming deprecated.
 - ANSI codes: Ignore unknown, unsupported ANSI codes.
 
+docs:
+
+- FIX: "source_suffix" for newer sphinx versions.
+- Inherit version info from Python package.
+
 FIXES:
 
 - sphinxcontrib: Remove "__init__.py" for namespace support.
@@ -22,6 +27,7 @@ FIXES:
 
 DEVELOP:
 
+- Modernize CI build environment for: tox.yml
 - .envrc: Add "direnv" support to simplify workspace setup.
 
 RELATED:

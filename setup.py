@@ -31,7 +31,7 @@ with open('README.rst') as stream:
 
 setup(
     name='sphinxcontrib-ansi',
-    version='0.7.1',
+    version='0.7.2',
     url='https://github.com/sphinx-contrib/ansi',
     download_url='http://pypi.org/project/sphinxcontrib-ansi',
     license="BSD-2-Clause",

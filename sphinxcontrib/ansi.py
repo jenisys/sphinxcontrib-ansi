@@ -46,7 +46,7 @@ from sphinx.util.osutil import copyfile
 # DISABLED: from sphinx.util.console import bold
 
 
-__version__ = '0.7.0'
+__version__ = "0.7.2"
 
 # -- DIAGNOSTIC SUPPORT:
 DIAG = os.environ.get("SPHINXCONTRIB_ANSI_DIAG", "no") == "yes"
