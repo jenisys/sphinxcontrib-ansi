@@ -36,7 +36,7 @@ jobs:
 
     steps:
       - name: Check out sources from Git repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0  # needed by setuptools-scm
       - name: Set up Python ${{ matrix.python-version }}
@@ -100,7 +100,7 @@ jobs:
       TOX_PARALLEL_NO_SPINNER: 1
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0  # needed by setuptools-scm
       - name: Set up Python ${{ matrix.python-version }}
@@ -153,7 +153,7 @@ jobs:
         run: >-
           python3 -mpip install --user tox
       - name: Check out src from Git
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0  # needed by setuptools-scm
 
